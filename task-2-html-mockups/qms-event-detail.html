@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIVOA LSc QMS - Event DEV-2025-001</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles from lead display view for consistency */
+        :root {
+            --font-size-base: 0.75rem;   /* 12px - Base */
+            --font-size-xs: 0.6875rem; /* 11px - Extra Small */
+            --font-size-sm: 0.75rem;   /* 12px - Small */
+            --font-size-lg: 1rem;     /* 16px - Large */
+            --font-size-xl: 1.125rem;  /* 18px - Extra Large */
+        }
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif; font-size: var(--font-size-base); line-height: 1.4;
+            color: #334155; background-color: #f1f5f9; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+            display: flex; flex-direction: column; height: 100vh;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; } ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; } ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* Layout */
+        .main-layout { display: flex; flex-direction: column; height: 100vh; }
+        .content-area-wrapper { display: flex; flex-grow: 1; overflow: hidden; }
+        main.content-area { flex-grow: 1; overflow-y: auto; padding: 1rem; background-color: #f1f5f9; display: flex; flex-direction: column; }
+        aside.ai-assistant-panel { width: 260px; background-color: white; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; flex-shrink: 0; height: 100%; overflow: hidden; }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.25rem 0.5rem; border: 1px solid transparent; font-size: var(--font-size-xs); font-weight: 500; border-radius: 0.25rem; box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05); transition: all 0.15s ease-in-out; cursor: pointer; line-height: 1.2; }
+        .btn-primary { color: white; background-color: #4f46e5; border-color: #4f46e5; } .btn-primary:hover { background-color: #4338ca; border-color: #4338ca; }
+        .btn-secondary { color: #334155; background-color: white; border-color: #cbd5e1; } .btn-secondary:hover { background-color: #f8fafc; }
+        .btn-danger { color: #dc2626; background-color: white; border-color: #fecaca; } .btn-danger:hover { background-color: #fee2e2; }
+        .btn-success { color: white; background-color: #16a34a; border-color: #16a34a; } .btn-success:hover { background-color: #15803d; border-color: #15803d; }
+        .btn .lucide { width: 0.75rem; height: 0.75rem; } .btn .lucide.mr-1 { margin-right: 0.15rem; }
+        .btn.icon-only { padding: 0.25rem; } .btn.icon-only .lucide { margin: 0; }
+        
+        /* Header Card */
+        .header-card { background-color: white; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); flex-shrink: 0; }
+        .header-card .top-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .header-card h1 { font-size: var(--font-size-lg); font-weight: 600; color: #1e293b; display: flex; align-items: center; }
+        .header-card h1 .lucide { color: #4f46e5; width: 1.1em; height: 1.1em; margin-right: 0.375rem; }
+        .header-card .header-meta { font-size: var(--font-size-xs); color: #64748b; margin-top: 0.25rem; border-top: 1px solid #f1f5f9; padding-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem;}
+        .header-card .header-meta strong { color: #334155; font-weight: 500; }
+        .header-card .detail-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .header-card .header-meta .meta-item { display: flex; align-items: center; }
+        .header-card .header-meta .meta-item .lucide { width: 0.8rem; height: 0.8rem; margin-right: 0.2rem; color: #94a3b8; }
+        
+        /* Tabs */
+        .detail-tabs { border-bottom: 1px solid #e2e8f0; margin-bottom: 1rem; flex-shrink: 0; }
+        .detail-tab-button { padding: 0.4rem 0.8rem; font-size: var(--font-size-sm); font-weight: 500; color: #475569; border: none; background: none; cursor: pointer; margin-bottom: -1px; border-bottom: 2px solid transparent; transition: color 0.2s ease, border-color 0.2s ease; display: inline-flex; align-items: center; }
+        .detail-tab-button:hover { color: #1e293b; }
+        .detail-tab-button.active { color: #4f46e5; border-bottom-color: #4f46e5; }
+        .detail-tab-button .lucide { width: 0.875rem; height: 0.875rem; margin-right: 0.25rem; }
+        .detail-tab-content-wrapper { flex-grow: 1; overflow-y: auto; }
+        .detail-tab-content { display: none; padding-right: 0.25rem; }
+        .detail-tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Detail Fields Display & Edit */
+        .detail-section { margin-bottom: 1.25rem; background-color: white; padding: 0.75rem; border-radius: 0.25rem; border: 1px solid #e5e7eb; }
+        .detail-section.editing { background-color: #f0f9ff !important; border-color: #bae6fd; }
+        .detail-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding-bottom: 0.375rem; border-bottom: 1px solid #f1f5f9; }
+        .detail-section-header h3 { font-size: var(--font-size-sm); font-weight: 600; color: #1e293b; display: flex; align-items: center; }
+        .detail-section-header h3 .lucide { width: 0.875rem; height: 0.875rem; margin-right: 0.375rem; color: #64748b; }
+        .detail-section-actions button { margin-left: 0.5rem; }
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem 1rem; }
+        .detail-field { margin-bottom: 0.5rem; }
+        .detail-field dt { font-size: var(--font-size-xs); color: #64748b; font-weight: 500; margin-bottom: 0.1rem; display: flex; align-items: center; }
+        .detail-field dt .lucide { width: 0.75rem; height: 0.75rem; margin-right: 0.2rem; color: #94a3b8;}
+        .detail-field dd { font-size: var(--font-size-sm); color: #334155; word-wrap: break-word; min-height: 1.25rem; }
+        .edit-field input, .edit-field select, .edit-field textarea { width: 100%; padding: 0.2rem 0.4rem; border: 1px solid #cbd5e1; border-radius: 0.25rem; font-size: var(--font-size-sm); }
+        .edit-field input:focus, .edit-field select:focus, .edit-field textarea:focus { outline: 1px solid transparent; outline-offset: 1px; border-color: #4f46e5; box-shadow: 0 0 0 1px #c7d2fe; }
+        .detail-section:not(.editing) .edit-field { display: none; }
+        .detail-section:not(.editing) .edit-actions { display: none; }
+        .detail-section.editing .display-field { display: none; }
+        .detail-section.editing .edit-section-button { display: none; }
+
+        /* Status Badges */
+        .status-badge { display: inline-flex; align-items: center; padding: 0.1rem 0.4rem; font-size: 0.6875rem; font-weight: 500; border-radius: 0.25rem; line-height: 1.2; border: 1px solid transparent;}
+        .status-badge.blue { background-color: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .status-badge.yellow { background-color: #fef9c3; color: #854d0e; border-color: #fef08a; }
+        .status-badge.green { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .status-badge.red { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .status-badge.gray { background-color: #f3f4f6; color: #4b5563; border-color: #e5e7eb; }
+
+        /* Audit Trail */
+        .audit-trail-item { padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; gap: 0.75rem; }
+        .audit-trail-item:last-child { border-bottom: none; }
+        .audit-trail-icon { flex-shrink: 0; color: #64748b; margin-top: 0.1rem; }
+        .audit-trail-content { flex-grow: 1; }
+        .audit-trail-content p { margin-bottom: 0.1rem; }
+        .audit-trail-meta { font-size: var(--font-size-xs); color: #94a3b8; }
+
+        /* AI Assistant */
+        .ai-assistant-header { padding: 0.4rem 0.6rem; border-bottom: 1px solid #e2e8f0; background-color: #4f46e5; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .ai-assistant-header h3 { font-size: var(--font-size-sm); font-weight: 500; display: flex; align-items: center; }
+        .ai-assistant-chat-area { flex: 1 1 0%; padding: 0.6rem; overflow-y: auto; space-y: 0.5rem; font-size: var(--font-size-xs); }
+        .ai-bubble { padding: 0.3rem 0.5rem; border-radius: 0.25rem; max-width: 90%; line-height: 1.3; background-color: #f1f5f9; color: #334155;}
+        .ai-bubble.suggestion { background-color: #eef2ff; border: 1px solid #e0e7ff; color: #3730a3; }
+        .user-bubble { padding: 0.3rem 0.5rem; border-radius: 0.25rem; max-width: 90%; margin-left: auto; line-height: 1.3; background-color: #e0e7ff; color: #3730a3;}
+        .ai-assistant-input-area { padding: 0.4rem 0.6rem; border-top: 1px solid #e2e8f0; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="main-layout">
+
+    <header class="bg-white border-b border-slate-200 px-4 h-14 flex-shrink-0"></header>
+
+    <div class="content-area-wrapper">
+        <main class="content-area">
+            <!-- Header Card -->
+            <div class="header-card">
+                 <div class="top-row">
+                    <h1 class="flex items-center">
+                        <i data-lucide="file-warning"></i>
+                        <span id="event_title_header">DEV-2025-001: Line 3 temperature out of range</span>
+                    </h1>
+                    <div class="detail-actions">
+                        <button class="btn btn-primary"><i data-lucide="user-cog" class="mr-1"></i>Assign</button>
+                        <button class="btn btn-secondary"><i data-lucide="route" class="mr-1"></i>Initiate CAPA</button>
+                        <button class="btn btn-success"><i data-lucide="check-circle" class="mr-1"></i>Close Event</button>
+                        <button class="btn btn-secondary icon-only"><i data-lucide="more-horizontal"></i></button>
+                    </div>
+                </div>
+                <div class="header-meta">
+                    <span class="meta-item"><i data-lucide="git-fork"></i><strong>Type:</strong>&nbsp;Deviation</span>
+                    <span class="meta-item"><i data-lucide="shield-alert"></i><strong>Severity:</strong>&nbsp;<span class="status-badge red">High</span></span>
+                    <span class="meta-item"><i data-lucide="flag"></i><strong>Priority:</strong>&nbsp;<span class="status-badge yellow">Medium</span></span>
+                    <span class="meta-item"><i data-lucide="user-check"></i><strong>Owner:</strong>&nbsp;Alice Johnson</span>
+                    <span class="meta-item"><i data-lucide="calendar"></i><strong>Created:</strong>&nbsp;2025-08-19</span>
+                    <span class="meta-item"><i data-lucide="loader"></i><strong>Status:</strong>&nbsp;<span class="status-badge blue">In Progress</span></span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="px-0 border-b border-slate-200 flex-shrink-0">
+                 <nav class="detail-tabs -mb-px flex space-x-3" aria-label="Tabs">
+                     <button class="detail-tab-button active" data-tab="details-tab"><i data-lucide="info"></i>Details</button>
+                     <button class="detail-tab-button" data-tab="investigation-tab"><i data-lucide="search-check"></i>Investigation & CAPA</button>
+                     <button class="detail-tab-button" data-tab="related-tab"><i data-lucide="link"></i>Related Records</button>
+                     <button class="detail-tab-button" data-tab="ai-insights-tab"><i data-lucide="sparkles"></i>AI Insights</button>
+                 </nav>
+            </div>
+
+            <div class="detail-tab-content-wrapper">
+                <!-- Details Tab -->
+                <div id="details-tab" class="detail-tab-content active">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="lg:col-span-2 space-y-4">
+                            <div class="detail-section" data-section="description">
+                                <div class="detail-section-header">
+                                    <h3><i data-lucide="file-text"></i>Event Description</h3>
+                                    <div class="detail-section-actions">
+                                        <button class="btn btn-secondary edit-section-button"><i data-lucide="pencil" class="mr-1"></i>Edit</button>
+                                        <div class="edit-actions"><button class="btn btn-secondary cancel-edit-button"><i data-lucide="x" class="mr-1"></i>Cancel</button><button class="btn btn-primary save-edit-button ml-2"><i data-lucide="check" class="mr-1"></i>Save</button></div>
+                                    </div>
+                                </div>
+                                <div class="display-field" data-field="event_description">
+                                    <p class="text-sm text-slate-700">During routine monitoring of Manufacturing Line 3, the temperature of Reactor R-101 was observed to be at 85°C at 10:45 AM, exceeding the validated upper limit of 80°C. The excursion lasted for approximately 15 minutes before being brought back into range. The batch in process was PRODA-2405-001.</p>
+                                </div>
+                                <div class="edit-field">
+                                    <textarea name="event_description" rows="5">During routine monitoring of Manufacturing Line 3, the temperature of Reactor R-101 was observed to be at 85°C at 10:45 AM, exceeding the validated upper limit of 80°C. The excursion lasted for approximately 15 minutes before being brought back into range. The batch in process was PRODA-2405-001.</textarea>
+                                </div>
+                            </div>
+                            <div class="detail-section" data-section="identification">
+                                <div class="detail-section-header">
+                                    <h3><i data-lucide="clipboard-list"></i>Event Details</h3>
+                                    <div class="detail-section-actions">
+                                        <button class="btn btn-secondary edit-section-button"><i data-lucide="pencil" class="mr-1"></i>Edit</button>
+                                        <div class="edit-actions"><button class="btn btn-secondary cancel-edit-button"><i data-lucide="x" class="mr-1"></i>Cancel</button><button class="btn btn-primary save-edit-button ml-2"><i data-lucide="check" class="mr-1"></i>Save</button></div>
+                                    </div>
+                                </div>
+                                <dl class="detail-grid">
+                                    <div class="detail-field"><dt><i data-lucide="calendar-clock"></i>Occurrence Date</dt><dd class="display-field" data-field="occurrence_date">2025-08-18</dd><div class="edit-field"><input type="date" name="occurrence_date" value="2025-08-18"></div></div>
+                                    <div class="detail-field"><dt><i data-lucide="clock"></i>Occurrence Time</dt><dd class="display-field" data-field="occurrence_time">10:45 AM</dd><div class="edit-field"><input type="time" name="occurrence_time" value="10:45"></div></div>
+                                    <div class="detail-field"><dt><i data-lucide="building"></i>Department</dt><dd class="display-field" data-field="department">Manufacturing</dd><div class="edit-field"><input type="text" name="department" value="Manufacturing"></div></div>
+                                    <div class="detail-field"><dt><i data-lucide="map-pin"></i>Location / Equipment</dt><dd class="display-field" data-field="location">Manufacturing Line 3 / R-101</dd><div class="edit-field"><input type="text" name="location" value="Manufacturing Line 3 / R-101"></div></div>
+                                </dl>
+                            </div>
+                            <div class="detail-section" data-section="assessment">
+                                <div class="detail-section-header">
+                                    <h3><i data-lucide="zap"></i>Impact & Initial Actions</h3>
+                                    <div class="detail-section-actions">
+                                        <button class="btn btn-secondary edit-section-button"><i data-lucide="pencil" class="mr-1"></i>Edit</button>
+                                        <div class="edit-actions"><button class="btn btn-secondary cancel-edit-button"><i data-lucide="x" class="mr-1"></i>Cancel</button><button class="btn btn-primary save-edit-button ml-2"><i data-lucide="check" class="mr-1"></i>Save</button></div>
+                                    </div>
+                                </div>
+                                <dl class="detail-grid">
+                                    <div class="detail-field"><dt><i data-lucide="shield-alert"></i>Severity</dt><dd class="display-field" data-field="severity"><span class="status-badge red">High</span></dd><div class="edit-field"><select name="severity"><option>High</option><option>Medium</option><option>Low</option></select></div></div>
+                                    <div class="detail-field"><dt><i data-lucide="flag"></i>Priority</dt><dd class="display-field" data-field="priority"><span class="status-badge yellow">Medium</span></dd><div class="edit-field"><select name="priority"><option>Medium</option><option>High</option><option>Low</option></select></div></div>
+                                    <div class="detail-field col-span-full"><dt><i data-lucide="alert-circle"></i>Immediate Actions Taken</dt><dd class="display-field" data-field="immediate_actions">Production on Line 3 was halted. Batch PRODA-2405-001 was immediately placed in quarantine.</dd><div class="edit-field"><textarea name="immediate_actions" rows="3">Production on Line 3 was halted. Batch PRODA-2405-001 was immediately placed in quarantine.</textarea></div></div>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1 space-y-4">
+                            <div class="detail-section" data-section="assignment">
+                                <div class="detail-section-header">
+                                    <h3><i data-lucide="users"></i>People & Assignment</h3>
+                                    <div class="detail-section-actions">
+                                        <button class="btn btn-secondary edit-section-button"><i data-lucide="pencil" class="mr-1"></i>Edit</button>
+                                        <div class="edit-actions"><button class="btn btn-secondary cancel-edit-button"><i data-lucide="x" class="mr-1"></i>Cancel</button><button class="btn btn-primary save-edit-button ml-2"><i data-lucide="check" class="mr-1"></i>Save</button></div>
+                                    </div>
+                                </div>
+                                <dl class="detail-grid grid-cols-1">
+                                    <div class="detail-field"><dt><i data-lucide="user-plus"></i>Initiator</dt><dd class="display-field" data-field="initiator">A. Johnson</dd><div class="edit-field"><input type="text" name="initiator" value="A. Johnson"></div></div>
+                                    <div class="detail-field"><dt><i data-lucide="user-check"></i>Event Owner</dt><dd class="display-field" data-field="event_owner">B. Williams</dd><div class="edit-field"><input type="text" name="event_owner" value="B. Williams"></div></div>
+                                    <div class="detail-field"><dt><i data-lucide="users-2"></i>Team Members</dt><dd class="display-field" data-field="team_members">C. Brown, S. Gupta</dd><div class="edit-field"><input type="text" name="team_members" value="C. Brown, S. Gupta"></div></div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Investigation & CAPA Tab -->
+                <div id="investigation-tab" class="detail-tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="space-y-4">
+                            <div class="detail-section" data-section="investigation_plan">
+                                <div class="detail-section-header">
+                                    <h3><i data-lucide="file-pen-line"></i>Investigation Plan</h3>
+                                    <div class="detail-section-actions">
+                                        <button class="btn btn-secondary edit-section-button"><i data-lucide="pencil" class="mr-1"></i>Edit</button>
+                                        <div class="edit-actions"><button class="btn btn-secondary cancel-edit-button"><i data-lucide="x" class="mr-1"></i>Cancel</button><button class="btn btn-primary save-edit-button ml-2"><i data-lucide="check" class="mr-1"></i>Save</button></div>
+                                    </div>
+                                </div>
+                                <div class="display-field" data-field="investigation_plan">
+                                    <ol class="list-decimal list-inside text-sm space-y-1 pl-2">
+                                        <li>Review sensor calibration records for R-101.</li>
+                                        <li>Interview operator Charlie Brown.</li>
+                                        <li>Analyze batch controller logs for anomalies.</li>
+                                        <li>Test affected batch sample for degradation.</li>
+                                    </ol>
+                                </div>
+                                <div class="edit-field">
+                                    <textarea name="investigation_plan" rows="5">Review sensor calibration records for R-101.
+Interview operator Charlie Brown.
+Analyze batch controller logs for anomalies.
+Test affected batch sample for degradation.</textarea>
+                                </div>
+                            </div>
+                             <div class="detail-section" data-section="root_cause_analysis">
+                                <div class="detail-section-header">
+                                    <h3><i data-lucide="microscope"></i>Root Cause Analysis</h3>
+                                    <div class="detail-section-actions">
+                                        <button class="btn btn-secondary edit-section-button"><i data-lucide="pencil" class="mr-1"></i>Edit</button>
+                                        <div class="edit-actions"><button class="btn btn-secondary cancel-edit-button"><i data-lucide="x" class="mr-1"></i>Cancel</button><button class="btn btn-primary save-edit-button ml-2"><i data-lucide="check" class="mr-1"></i>Save</button></div>
+                                    </div>
+                                </div>
+                                <dl class="detail-grid grid-cols-1">
+                                    <div class="detail-field"><dt>Method</dt><dd class="display-field" data-field="rca_method">5 Whys</dd><div class="edit-field"><input type="text" name="rca_method" value="5 Whys"></div></div>
+                                    <div class="detail-field"><dt>Root Cause</dt><dd class="display-field" data-field="root_cause">The preventative maintenance schedule for temperature sensor (SN-4815) was not followed due to a clerical error in the CMMS, leading to calibration drift.</dd><div class="edit-field"><textarea name="root_cause" rows="3">The preventative maintenance schedule for temperature sensor (SN-4815) was not followed due to a clerical error in the CMMS, leading to calibration drift.</textarea></div></div>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                             <div class="detail-section">
+                                <h3 class="detail-section-header"><i data-lucide="route"></i>Linked CAPAs</h3>
+                                <div class="text-sm">
+                                    <a href="#" class="font-medium text-indigo-600 hover:underline">CAPA-2025-012:</a> 
+                                    <span>Update CMMS workflow to require dual verification for PM deferrals.</span> 
+                                    <span class="status-badge yellow ml-2">In Progress</span>
+                                </div>
+                             </div>
+                             <div class="detail-section">
+                                 <h3 class="detail-section-header"><i data-lucide="history"></i>Audit Trail</h3>
+                                 <div class="audit-trail-item">
+                                     <i data-lucide="user-cog" class="audit-trail-icon"></i>
+                                     <div class="audit-trail-content"><p><strong>Investigator Assigned</strong> to Alice Johnson</p><p class="audit-trail-meta">2025-06-23 - 09:15 AM by Bob Williams</p></div>
+                                 </div>
+                                 <div class="audit-trail-item">
+                                     <i data-lucide="plus-circle" class="audit-trail-icon"></i>
+                                     <div class="audit-trail-content"><p><strong>Event Created</strong></p><p class="audit-trail-meta">2025-06-23 - 09:01 AM by Charlie Brown</p></div>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Records Tab -->
+                <div id="related-tab" class="detail-tab-content">
+                     <div class="detail-section">
+                        <h3 class="detail-section-header"><i data-lucide="link-2"></i>Linked Records</h3>
+                        <p class="text-center text-slate-400 italic py-4 text-xs">Placeholder: Links to Equipment (R-101), Batch (PRODA-2405-001), Document (SOP-MFG-001), etc. would be listed here.</p>
+                     </div>
+                </div>
+
+                 <!-- AI Insights Tab -->
+                 <div id="ai-insights-tab" class="detail-tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="detail-section">
+                            <h3 class="detail-section-header"><i data-lucide="brain-circuit"></i>AI Analysis</h3>
+                             <dl class="detail-grid grid-cols-1">
+                                <div class="detail-field">
+                                    <dt><i data-lucide="crosshair"></i>Suggested Root Cause</dt>
+                                    <dd>Sensor failure, calibration issue, or controller malfunction are the highest probability root causes based on analysis of 52 similar temperature excursion events.</dd>
+                                </div>
+                                <div class="detail-field">
+                                    <dt><i data-lucide="check-check"></i>Suggested Corrective Action</dt>
+                                    <dd>Implement a mandatory pre-use sensor check protocol for critical processes. AI predicts this could reduce similar events by 45%.</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div class="detail-section">
+                             <h3 class="detail-section-header"><i data-lucide="history"></i>Similar Events</h3>
+                            <div class="text-sm mb-2">
+                                <a href="#" class="font-medium text-indigo-600 hover:underline">DEV-2024-112:</a> 
+                                <span>Temperature high on R-203. Root Cause: Sensor Drift.</span>
+                            </div>
+                            <div class="text-sm">
+                                <a href="#" class="font-medium text-indigo-600 hover:underline">DEV-2024-045:</a> 
+                                <span>Line 1 temp controller fault. Root Cause: Controller card failure.</span>
+                            </div>
+                        </div>
+                         <div class="detail-section col-span-full">
+                            <h3 class="detail-section-header"><i data-lucide="file-text"></i>AI Generated Summary</h3>
+                            <p class="text-sm text-slate-700">A **medium-risk, high-severity Deviation** (DEV-2025-001) occurred on 2025-06-22 when Reactor R-101 on Line 3 exceeded its temperature limit for 15 minutes. Batch PRODA-2405-001 was quarantined. The event was logged by C. Brown and is under investigation by A. Johnson. Preliminary root cause points to a sensor issue. A CAPA has been initiated to address maintenance procedures.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+        <!-- AI Assistant Panel -->
+        <aside class="ai-assistant-panel">
+             <div class="ai-assistant-header"><h3><i data-lucide="brain-circuit"></i>AI Assistant</h3></div>
+             <div id="ai-chat-area" class="ai-assistant-chat-area"></div>
+             <div class="ai-assistant-input-area">
+                 <div class="relative"><input type="text" id="ai-input" placeholder="Ask about this event..." class="w-full text-xs border rounded-full py-1.5 px-3 pr-8"><button id="ai-send-button" title="Send" class="absolute inset-y-0 right-0 flex items-center pr-2 text-indigo-600"><i data-lucide="send" class="w-4 h-4"></i></button></div>
+             </div>
+        </aside>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             const Lucide = window.lucide;
+             if (!Lucide) { return; }
+
+            // --- Elements ---
+             const detailTabButtons = document.querySelectorAll('.detail-tab-button');
+             const detailTabContents = document.querySelectorAll('.detail-tab-content');
+             const aiChatArea = document.getElementById('ai-chat-area');
+             const aiInput = document.getElementById('ai-input');
+             const aiSendButton = document.getElementById('ai-send-button');
+
+            // --- Initial AI Message ---
+            addAiMessage("Viewing Deviation **DEV-2025-001**. Ask me to 'summarize this event', 'find similar events', or 'suggest investigation steps'.", "suggestion");
+
+            // --- Tab Switching Logic ---
+            detailTabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTabId = button.getAttribute('data-tab');
+                    detailTabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    detailTabContents.forEach(content => {
+                        content.classList.toggle('active', content.id === targetTabId);
+                    });
+                    Lucide.createIcons();
+                });
+            });
+
+            // --- AI Assistant Chat Simulation ---
+            function addAiMessage(text, type = 'ai') {
+                 if (!aiChatArea || !text) return;
+                const bubble = document.createElement('div');
+                bubble.classList.add('ai-bubble');
+                if(type === 'suggestion') bubble.classList.add('suggestion');
+                bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                aiChatArea.appendChild(bubble);
+                aiChatArea.scrollTop = aiChatArea.scrollHeight;
+            }
+            function addUserMessage(text) {
+                if (!aiChatArea || !text.trim()) return;
+                const bubble = document.createElement('div');
+                bubble.classList.add('user-bubble');
+                bubble.textContent = text;
+                aiChatArea.appendChild(bubble);
+                aiChatArea.scrollTop = aiChatArea.scrollHeight;
+            }
+             function simulateAiResponse(userText) {
+                 setTimeout(() => {
+                     let response = `(Simulated AI response for "${userText}")`;
+                      if (userText.toLowerCase().includes("summarize")) { response = `**AI Summary:** This is a Medium-risk Deviation where a reactor temperature exceeded its limit. The affected batch is quarantined, and the investigation points to a sensor calibration issue.`; }
+                      else if (userText.toLowerCase().includes("similar")) { response = `**AI Search:** I found 2 other temperature excursion events in the last 12 months. **DEV-2024-112** was also due to sensor drift. **DEV-2024-045** was a controller failure.`; }
+                      else if (userText.toLowerCase().includes("investigation steps")) { response = `**AI Suggestion:** Recommended investigation steps are: 1. Pull calibration records for sensor SN-4815. 2. Review alarm logs for the past 30 days. 3. Test a sample from the quarantined batch for key quality attributes.`; }
+                     addAiMessage(response);
+                 }, 500);
+             }
+             function handleAiSend() { const userText = aiInput.value.trim(); if (!userText) return; addUserMessage(userText); aiInput.value = ''; simulateAiResponse(userText); }
+             aiSendButton.addEventListener('click', handleAiSend); 
+             aiInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleAiSend(); } });
+
+             // --- In-Place Editing Logic ---
+            const detailSections = document.querySelectorAll('.detail-section');
+            detailSections.forEach(section => {
+                const editButton = section.querySelector('.edit-section-button');
+                const saveButton = section.querySelector('.save-edit-button');
+                const cancelButton = section.querySelector('.cancel-edit-button');
+
+                if (editButton && saveButton && cancelButton) {
+                    editButton.addEventListener('click', () => {
+                        section.classList.add('editing');
+                    });
+
+                    cancelButton.addEventListener('click', () => {
+                        section.classList.remove('editing');
+                        // Optional: a function to reset field values to original can be added here
+                    });
+
+                    saveButton.addEventListener('click', () => {
+                        const editFields = section.querySelectorAll('.edit-field [name]');
+                        editFields.forEach(input => {
+                            const fieldName = input.name;
+                            const displayField = section.querySelector(`.display-field[data-field="${fieldName}"]`);
+                            if (displayField) {
+                                // This is a simplified update. A real app would handle HTML formatting.
+                                if (input.tagName === 'SELECT') {
+                                    displayField.textContent = input.options[input.selectedIndex].text;
+                                } else if (input.tagName === 'TEXTAREA' && fieldName === 'investigation_plan') {
+                                     const lines = input.value.split('\n').filter(line => line.trim() !== '');
+                                     const ol = document.createElement('ol');
+                                     ol.className = 'list-decimal list-inside text-sm space-y-1 pl-2';
+                                     lines.forEach(line => {
+                                         const li = document.createElement('li');
+                                         li.textContent = line;
+                                         ol.appendChild(li);
+                                     });
+                                     displayField.innerHTML = '';
+                                     displayField.appendChild(ol);
+                                } else {
+                                    displayField.textContent = input.value;
+                                }
+                            }
+                        });
+                        section.classList.remove('editing');
+                    });
+                }
+            });
+             
+             // --- Initial Setup ---
+             Lucide.createIcons();
+
+        });
+    </script>
+
+</body>
+</html>
