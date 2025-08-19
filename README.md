@@ -111,6 +111,6 @@ The AI assistant is integrated into the event list screen. It has access to the 
 
 ## Video Demo
 
-[Link to a short video showcasing the application's functionality.]
+https://drive.google.com/file/d/12grA9LACMqG2fP7CrwY_RiOlJ5t4y8cS/view?usp=sharing
 
 ---
